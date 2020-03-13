@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/Asus/CLionProjects/sem2Lab1(big_numbers)/Big_Number.cpp
+Big_Number.h
+C:/Users/Asus/CLionProjects/sem2Lab1(big_numbers)/Big_Number.h
+cstdlib
+-
+
+C:/Users/Asus/CLionProjects/sem2Lab1(big_numbers)/Big_Number.h
+iostream
+-
+string
+-
+cstdlib
+-
+

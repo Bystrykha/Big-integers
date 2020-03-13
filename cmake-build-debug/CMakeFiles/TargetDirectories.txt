@@ -1,0 +1,3 @@
+C:/Users/Asus/CLionProjects/sem2Lab1(big_numbers)/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Asus/CLionProjects/sem2Lab1(big_numbers)/cmake-build-debug/CMakeFiles/sem2Lab1_big_numbers_.dir
+C:/Users/Asus/CLionProjects/sem2Lab1(big_numbers)/cmake-build-debug/CMakeFiles/edit_cache.dir
