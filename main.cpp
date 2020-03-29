@@ -10,8 +10,8 @@ int main() {
    while(true) {
        cin >> a;
        cin >> b;
-       c = a - b;
-     cout <<"c = " << c << endl;
+       a / b;
+   // cout <<"c = " << (a - b) << endl;
    }
    return 0;
 }

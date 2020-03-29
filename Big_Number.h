@@ -32,9 +32,12 @@ public:
     Big_Number operator*(const Big_Number &BN);
     Big_Number operator-=(const Big_Number &BN);
     Big_Number operator+=(const Big_Number &BN);
+    Big_Number operator/(int n);
+    int operator%(int n);
+    Big_Number operator/(Big_Number &BN);
     int Compare(const Big_Number &BN_2);
     int Count_Zero() const;
-
-    friend ostream& operator << (ostream &out, Big_Number &BN);
+    Big_Number Shift(int n);
+    friend ostream& operator << (ostream &out, const Big_Number &BN);
     friend istream& operator >> (istream &in, Big_Number &BN);
 };

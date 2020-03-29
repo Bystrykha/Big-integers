@@ -38,7 +38,7 @@ Big_Number::~Big_Number(){                  //диструктор
     integers = NULL;
 }
 
-ostream &operator << (ostream &out, Big_Number &BN) {
+ostream &operator << (ostream &out, const Big_Number &BN) {
     bool is_write_zero = false;         //проупск первых нулей
     for(int i = 0; i < BN.taken_coefficient; i++){      //вывод с начала
        for(int j = Base_size * 8 - 4; j >= 0; j -= 4){
@@ -63,7 +63,7 @@ istream &operator >> (istream &in, Big_Number &BN) {
     BN.integers = new Base[BN.taken_coefficient];   // выделяем место под большое число
     for(int i = 0; i<BN.all_coefficient; i++) BN.integers[i] = 0;   //заполняем нклями выделенную память(на всякий случай)
     int index_el_of_Mass = BN.all_coefficient-1;    //указывает номер элемента массива, в который попадет коэфф.
-    int new_el = 0;     // сюжа будем считывать символ из введенной нами строки (с преобразованным типом данных)
+    int new_el = 0;     // сюда будем считывать символ из введенной нами строки (с преобразованным типом данных)
     int free_bits = Base_size * 8;  //указываем размер одного элемента большого числа
     for(int i = Your_BN.size() - 1; i >= 0; i--){       //заполнение с конца(последний символ строки станет последней цифрой большого числа(младшим разрядом))
         if('0' <= Your_BN[i] && Your_BN[i] <= '9') new_el = Your_BN[i] - '0';               //69 - 71стр : преобразование символа строки в целочисленную пременную(используя табл. ASCII)
@@ -148,28 +148,43 @@ Big_Number &Big_Number::operator=(const Big_Number& BN) {
 }
 
 Big_Number Big_Number::operator-(const Big_Number &BN) {
-    int max_size = max(taken_coefficient, BN.taken_coefficient);    //орпеделяем размер наибольшего БЧ
+    cout << "first = " << *this << endl << "second = " << BN << endl;
+    cout <<"all = " << all_coefficient << endl << "take = " << taken_coefficient << endl;
+    int max_size = taken_coefficient;    //орпеделяем размер наибольшего БЧ
     Big_Number minuend = *this;     //переопределяем для ясности
+    cout << "minuend1 = " << minuend << endl;
     Big_Number subtrahend;
     subtrahend = BN;
     Big_Number difference(2, max_size);     // БЧ под ответ
     for(int i = minuend.taken_coefficient - 1, j = subtrahend.taken_coefficient - 1; i >=0; i--, j--){
         int first = minuend.integers[i], second = 0;
+        cout << "minuend2 = " << minuend << endl;
+
         if(j >= 0) second = subtrahend.integers[j];
         if(first < second) {        //если прийдется занять из след. разряда
-            for (int k = i - 1; k >= 0; k--) {
+            for (int k = i - 1, j = 0 ; k >= 0; k--) {
+                cout << "minuend3 = " << minuend << endl;
+
                 int next = minuend.integers[k]; // число, изначально на 1 разряд выше
-                if (next == 0) minuend.integers[k] = pow(2, Base_size * 8) - 1; // если занимаем у 0 - присваеваем ему значение (основание - 1) и занимаем у след. разряда
+                if (next == 0) j = k;
                 if (next > 0) {     //если не 0, то занимаем
                     minuend.integers[k] -= 1;
                     first += pow(2,Base_size * 8);
+                    cout << "minuend4 = " << minuend << endl;
+
+                    for(int t = k-1; t >= j; t--){
+                        minuend.integers[t] = pow(2, Base_size * 8) - 1; // если занимаем у 0 - присваеваем ему значение (основание - 1) и занимаем у след. разряда
+                        cout << "minuend5 = " << minuend << endl;
+                    }
+                    cout << "minuend6 = " << minuend << endl;
+
                 }
             }
         }
-        //cout << "1 = " << first << endl << "2 = " << second << endl;
         difference.integers[i] = first - second;    //подсчет разности
-        //cout << "Dif = " << difference << endl;
-            }
+    }
+    cout <<"all = " << difference.all_coefficient << endl << "take = " << difference.taken_coefficient << endl;
+    cout <<" - " << difference << endl;
     return difference;
     }
 
@@ -179,7 +194,7 @@ Big_Number Big_Number::operator*(int n) {
     Big_Number Composition(2, taken_coefficient + 1);
     for(int i = taken_coefficient - 1; i >= 0; i--){
         int factor = integers[i];
-        res = factor * n + term;
+        res = factor * n + term;    ///если не полюс, то по теоремам(проще), иначе: разлагаем в ряд Лорана и находим С(-1)
         Composition.integers[i + 1] = res;  // i + 1: так как в результате произведения размер БЧ может получиться больше на 1, записываеипромежуточный результат в соотвецтвующий разряд
        // cout << "BN_coeff = " << factor << endl;
        // cout << "n = " << n << endl;
@@ -201,18 +216,13 @@ Big_Number Big_Number::operator*(const Big_Number &BN) {
         Big_Number Term(2, taken_coefficient + 1);  //создаем БЧ, для записи промежуточного результата
         int factor = BN.integers[j];    // коэфф. БЧ, на который будем умножать
         Term = *this * factor;  // умножение БЧ на коэфф. и запись промежуточного результата
-        //cout << "BN = " << *this << endl;
-        //cout << "factor = " << factor << endl;
-        //cout << "Term1 = " << Term << endl;
         Term = Term << BN.taken_coefficient - 1 - j;    //сдвиг на соотвецтвующее место (в зависимости от разряда коэфф.) (перегрузка сдвига ниже)
-        //cout << "Term2 = " << Term << endl;
         Composition = Composition + Term;       //сумма промежуточного результата с конечным ответом
-        //cout << "Composition = " << Composition << endl;
     }
     return Composition;
 }
 
-Big_Number Big_Number::operator<<(const int n) {        //сдвиг БЧ(повышение номера разряда всех коэфф.)
+Big_Number Big_Number::operator<<(const int n) {        //сдвиг БЧ(повышение номера разряда всех коэфф.(увеличивает размер БЧ))
     if(n == 0) return *this;
     Big_Number New_Term(2, all_coefficient + n);
     for(int i = 0; i < all_coefficient; i++){
@@ -231,3 +241,65 @@ Big_Number Big_Number::operator+=(const Big_Number &BN) {
     *this = *this + BN;
     return * this;
 }
+
+Big_Number Big_Number::operator/(int n) {
+    Big_Number Quotient(2, taken_coefficient);
+    int remainder = 0, use_coefficient = 0;
+    for(int i = 0; i < taken_coefficient; i++){
+        use_coefficient = integers[i] + (remainder << Base_size * 8);
+        Quotient.integers[i] = use_coefficient / n;
+        remainder = use_coefficient % n;
+    }
+    return Quotient;
+}
+
+int Big_Number::operator%(int n) {
+    Big_Number Quotient(2, taken_coefficient);
+    int remainder = 0, use_coefficient = 0;
+    for(int i = 0; i < taken_coefficient; i++){
+        use_coefficient = integers[i] + (remainder << Base_size * 8);
+        Quotient.integers[i] = use_coefficient / n;
+        remainder = use_coefficient % n;
+    }
+    return remainder;
+}
+
+Big_Number Big_Number::operator/( Big_Number &BN) {
+    Big_Number Result(2, taken_coefficient), use_coefficient(2, taken_coefficient),
+        remainder(2, BN.taken_coefficient);
+    for(int i = 0; i < taken_coefficient; i ++){
+        while(use_coefficient < BN){
+            use_coefficient.Shift(1);
+            cout << "1) " <<use_coefficient << endl;
+            use_coefficient.integers[taken_coefficient - 1] += integers[i];
+            i++;
+            cout <<"2) " << use_coefficient << endl;
+        }
+        cout << "4" << endl;
+        while(use_coefficient > BN){
+            //cout << "5" << endl;
+            cout << "use_coefficient = " << use_coefficient << endl << "BN = " << BN << endl;
+            cout << (use_coefficient - BN);
+            use_coefficient = use_coefficient - BN;
+            cout << "BN = " << BN << endl;
+            cout << "diff = " << use_coefficient << endl;
+            Result.integers[i] += 1;
+        }
+        cout << "6" << endl;
+        remainder = use_coefficient;
+    }cout << "7" << endl;
+    cout << Result;
+}
+
+Big_Number Big_Number::Shift(int n) {
+    for(int i = all_coefficient - taken_coefficient - 1; i < all_coefficient ; i++){
+        integers[i - 1] = integers[i];
+        integers[i] = 0;
+    }
+    return *this;
+}
+
+        //BCB72920
+        //a2d8
+
+
