@@ -38,6 +38,8 @@ public:
     int Compare(const Big_Number &BN_2);
     int Count_Zero() const;
     Big_Number Shift(int n);
+    string To_decimal();
+    static Big_Number From_decimal(string str);
     friend ostream& operator << (ostream &out, const Big_Number &BN);
     friend istream& operator >> (istream &in, Big_Number &BN);
 };

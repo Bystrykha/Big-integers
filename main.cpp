@@ -7,11 +7,10 @@ using namespace std;
 int main() {
    Big_Number a, b, c;
    int q;
-   while(true) {
-       cin >> a;
-       cin >> b;
-       a / b;
+       //cin >> a;
+       a = Big_Number::From_decimal("68247244188094483");
+       //cin >> b;
+       //a / b;
    // cout <<"c = " << (a - b) << endl;
-   }
    return 0;
 }
