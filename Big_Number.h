@@ -12,7 +12,7 @@ class Big_Number{
 
 
     Base *integers;
-    int taken_coefficient;
+    int taken_coefficient, all_coefficient;
 
 public:
     Big_Number();

@@ -4,23 +4,23 @@
 using namespace std;
 
 Big_Number::Big_Number() {                          //конструктор без аргументов
-        taken_coefficient = 1;
+        taken_coefficient = all_coefficient = 1;
         integers = new Base;
         integers[0] = 0;
     }
 
 Big_Number::Big_Number(int k, int n) {              //конструктор с аргументами:
     if(k == 2){                                            //при k = 2 создаем большое число нужного размера, состоящее полностью из нулей
-        taken_coefficient = n;
+        taken_coefficient = all_coefficient = n;
         integers = new Base[taken_coefficient];
         for(int i = 0; i < taken_coefficient; i++) {
             integers[i] = 0;
         }
     }
     if(k == 3){                                            //при k = 3 создаем большое число нужного размера, состоящее из рандомных коэффициентов
-        taken_coefficient = n;
+        taken_coefficient = all_coefficient = n;
         integers = new Base[taken_coefficient];
-        for(int i=0; i < taken_coefficient; i++) {
+        for(int i=0; i < all_coefficient; i++) {
             integers[i] = rand();
             }
     }
@@ -28,8 +28,9 @@ Big_Number::Big_Number(int k, int n) {              //конструктор с 
 
 Big_Number::Big_Number(Big_Number &BN) {                        // конструктор крпирования
     taken_coefficient=BN.taken_coefficient;
+    all_coefficient=BN.all_coefficient;
     integers = new Base[taken_coefficient];
-    for(int i=0; i < taken_coefficient; i++) integers[i]=BN.integers[i];
+    for(int i=0; i < all_coefficient; i++) integers[i]=BN.integers[i];
 }
 
 Big_Number::~Big_Number(){                  //диструктор
@@ -54,9 +55,11 @@ ostream &operator << (ostream &out, const Big_Number &BN) {
 istream &operator >> (istream &in, Big_Number &BN) {
     string Your_BN;
     cin >> Your_BN;             //вводим строку
-    BN.taken_coefficient = (Your_BN.size() * 4) / (Base_size * 8);     //определяем размер числа
-    if(((Your_BN.size() * 4) % (Base_size * 8)) != 0) BN.taken_coefficient++;     //добавляем место, если количетво символов не кратно основанию
-
+    BN.all_coefficient = BN.taken_coefficient = (Your_BN.size() * 4) / (Base_size * 8);     //определяем размер числа
+    if(((Your_BN.size() * 4) % (Base_size * 8)) != 0) {     //добавляем место, если количетво символов не кратно основанию
+        BN.all_coefficient++;
+        BN.taken_coefficient++;
+    }
     BN.integers = new Base[BN.taken_coefficient];   // выделяем место под большое число
     for(int i = 0; i<BN.all_coefficient; i++) BN.integers[i] = 0;   //заполняем нклями выделенную память(на всякий случай)
     int index_el_of_Mass = BN.all_coefficient-1;    //указывает номер элемента массива, в который попадет коэфф.
@@ -105,7 +108,6 @@ int Big_Number::Compare(const Big_Number & BN_2){
     int This_Zero = this->Count_Zero(); //вычисляем количество незначащих нулей(перед самим числом)
     if(this->taken_coefficient - This_Zero > BN_2.taken_coefficient - BN_2_Zero) return 1;      //стр. 109-111 : сравниваем по длине
     if(this -> taken_coefficient - This_Zero < BN_2.taken_coefficient - BN_2_Zero) return -1;
-    if(this -> taken_coefficient - This_Zero == BN_2.taken_coefficient - BN_2_Zero)
         for(int i = This_Zero, j = BN_2_Zero; i < this -> taken_coefficient; i++, j++){     //сравниваем коэфф. чисел, начиная с первого значащего коэфф (страрший значащий разряд)
             if(this -> integers[i] > BN_2.integers[j]) return 1;
             if(this -> integers[i] < BN_2.integers[j]) return -1;
