@@ -4,6 +4,7 @@
 using namespace std;
 
 typedef unsigned char Base;
+typedef unsigned long long Large_size;
 #define Base_size sizeof(Base)*1    //хранятся байты
 
 
@@ -11,7 +12,7 @@ class Big_Number{
 
 
     Base *integers;
-    int taken_coefficient, all_coefficient;
+    int taken_coefficient;
 
 public:
     Big_Number();

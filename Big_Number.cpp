@@ -4,23 +4,23 @@
 using namespace std;
 
 Big_Number::Big_Number() {                          //конструктор без аргументов
-        taken_coefficient = all_coefficient = 1;
+        taken_coefficient = 1;
         integers = new Base;
         integers[0] = 0;
     }
 
 Big_Number::Big_Number(int k, int n) {              //конструктор с аргументами:
     if(k == 2){                                            //при k = 2 создаем большое число нужного размера, состоящее полностью из нулей
-        taken_coefficient = all_coefficient = n;
+        taken_coefficient = n;
         integers = new Base[taken_coefficient];
         for(int i = 0; i < taken_coefficient; i++) {
             integers[i] = 0;
         }
     }
     if(k == 3){                                            //при k = 3 создаем большое число нужного размера, состоящее из рандомных коэффициентов
-        taken_coefficient = all_coefficient = n;
+        taken_coefficient = n;
         integers = new Base[taken_coefficient];
-        for(int i=0; i < all_coefficient; i++) {
+        for(int i=0; i < taken_coefficient; i++) {
             integers[i] = rand();
             }
     }
@@ -28,9 +28,8 @@ Big_Number::Big_Number(int k, int n) {              //конструктор с 
 
 Big_Number::Big_Number(Big_Number &BN) {                        // конструктор крпирования
     taken_coefficient=BN.taken_coefficient;
-    all_coefficient=BN.all_coefficient;
     integers = new Base[taken_coefficient];
-    for(int i=0; i < all_coefficient; i++) integers[i]=BN.integers[i];
+    for(int i=0; i < taken_coefficient; i++) integers[i]=BN.integers[i];
 }
 
 Big_Number::~Big_Number(){                  //диструктор
@@ -55,11 +54,9 @@ ostream &operator << (ostream &out, const Big_Number &BN) {
 istream &operator >> (istream &in, Big_Number &BN) {
     string Your_BN;
     cin >> Your_BN;             //вводим строку
-    BN.all_coefficient = BN.taken_coefficient = (Your_BN.size() * 4) / (Base_size * 8);     //определяем размер числа
-    if(((Your_BN.size() * 4) % (Base_size * 8)) != 0) {     //добавляем место, если количетво символов не кратно основанию
-        BN.all_coefficient++;
-        BN.taken_coefficient++;
-    }
+    BN.taken_coefficient = (Your_BN.size() * 4) / (Base_size * 8);     //определяем размер числа
+    if(((Your_BN.size() * 4) % (Base_size * 8)) != 0) BN.taken_coefficient++;     //добавляем место, если количетво символов не кратно основанию
+
     BN.integers = new Base[BN.taken_coefficient];   // выделяем место под большое число
     for(int i = 0; i<BN.all_coefficient; i++) BN.integers[i] = 0;   //заполняем нклями выделенную память(на всякий случай)
     int index_el_of_Mass = BN.all_coefficient-1;    //указывает номер элемента массива, в который попадет коэфф.
@@ -117,16 +114,16 @@ int Big_Number::Compare(const Big_Number & BN_2){
 }
 
 int Big_Number::Count_Zero() const {        //подсчет незначащих нулей
-    for(int i = 0; i < all_coefficient; i++)
-        if(integers[i] > 0) return i;
+    for(int i = 0; i < all_coefficient; i++) if(integers[i] > 0) return i;
+    return 0;
 }
 
 Big_Number Big_Number::operator+(const Big_Number &BN) {
     int max_size = max(taken_coefficient, BN.taken_coefficient);    //определяем размер наибольшего БЧ (большого числа)
     Big_Number Sum(2, max_size + 1);    //создаем новое БЧ с нужным размером, взятым с запасом
-    int remains = 0;    //сюда запишем сумму коэфф. БЧ-ел
+    Large_size remains = 0;    //сюда запишем сумму коэфф. БЧ-ел
     for(int i = taken_coefficient-1, j = BN.taken_coefficient-1, k = max_size; k >= 0; i--, j--, k--) {
-        int first_term = 0 , second_term = 0;   // сюда поподают коэфф. БЧ-ел
+        Large_size first_term = 0 , second_term = 0;   // сюда поподают коэфф. БЧ-ел
         if(i >= 0)  first_term = integers[i];   //если число кончилось, а цикл еще нет, считаем, что последующие разряды равны 0
         if(j >= 0)  second_term = BN.integers[j];   //если число кончилось, а цикл еще нет, считаем, что последующие разряды равны 0
         remains = first_term + second_term + remains;   //сумма(в remains после сдвига (134 стр.) то, что не вошло в предыдущую сумму
@@ -151,7 +148,7 @@ Big_Number Big_Number::operator-(const Big_Number &BN) {
     Big_Number Result(2,taken_coefficient);
     if(taken_coefficient < BN.taken_coefficient) return Result; //если вычетаемое > уменьшаемого
     for(int i = taken_coefficient - 1, j = BN.taken_coefficient -1; i >= 0; i--, j--){ // i - счетчик уменьшаемого, j - счетчик вычитаемого
-        int first = integers[i], second = 0;    //переменные: first - уменьшаемое, second - вычетаемое
+        Large_size first = integers[i], second = 0;    //переменные: first - уменьшаемое, second - вычетаемое
         if(j >= 0) second = BN.integers[j]; // запись вычетаемого
         if(first < second){ // если потребовался займ из следующих разрядов
             for(int k = i - 1; k >= 0; k--) {
@@ -171,32 +168,27 @@ Big_Number Big_Number::operator-(const Big_Number &BN) {
 }
 
 Big_Number Big_Number::operator*(int n) {
-    int res = 0;        //переменная для промежуточного результата
-    int term = 0;   // то, что перенесем в следующий разряд
+    Large_size res = 0;        //переменная для промежуточного результата
+    Large_size term = 0;   // то, что перенесем в следующий разряд
     Big_Number Composition(2, taken_coefficient + 1);
     for(int i = taken_coefficient - 1; i >= 0; i--){
-        int factor = integers[i];
-        res = factor * n + term;    ///если не полюс, то по теоремам(проще), иначе: разлагаем в ряд Лорана и находим С(-1)
+        Large_size factor = integers[i];
+        res = factor * n + term;
         Composition.integers[i + 1] = res;  // i + 1: так как в результате произведения размер БЧ может получиться больше на 1, записываеипромежуточный результат в соотвецтвующий разряд
-       // cout << "BN_coeff = " << factor << endl;
-       // cout << "n = " << n << endl;
-       // cout << "result = " << res << endl;
         res >>= (Base_size * 8);        // сдвиг и последующая запись в следующий разряд
         Composition.integers[i] = res;
         term = Composition.integers[i];
-       // cout << "remainder = " << term << endl;
-
     }
     return Composition;
 }
 
 
 Big_Number Big_Number::operator*(const Big_Number &BN) {
-    int Comp_size = taken_coefficient + BN.taken_coefficient;   // максимальный возможный размер результата
+    Large_size Comp_size = taken_coefficient + BN.taken_coefficient;   // максимальный возможный размер результата
     Big_Number Composition(2, Comp_size);
     for(int j = BN.taken_coefficient - 1; j >= 0; j--){     //движемся по одному из множетелей от млажшего разряда к старшему
         Big_Number Term(2, taken_coefficient + 1);  //создаем БЧ, для записи промежуточного результата
-        int factor = BN.integers[j];    // коэфф. БЧ, на который будем умножать
+        Large_size factor = BN.integers[j];    // коэфф. БЧ, на который будем умножать
         Term = *this * factor;  // умножение БЧ на коэфф. и запись промежуточного результата
         Term = Term << BN.taken_coefficient - 1 - j;    //сдвиг на соотвецтвующее место (в зависимости от разряда коэфф.) (перегрузка сдвига ниже)
         Composition = Composition + Term;       //сумма промежуточного результата с конечным ответом
@@ -215,18 +207,18 @@ Big_Number Big_Number::operator<<(const int n) {        //сдвиг БЧ(пов
 
 Big_Number Big_Number::operator-=(const Big_Number &BN) {       //тут, думаю, понятно
     *this = *this - BN;
-    return * this;
+    return *this;
 }
 
 
 Big_Number Big_Number::operator+=(const Big_Number &BN) {
     *this = *this + BN;
-    return * this;
+    return *this;
 }
 
 Big_Number Big_Number::operator/(int n) {
     Big_Number Quotient(2, taken_coefficient);      // результат разности
-    int remainder = 0, use_coefficient = 0;     // remainder - остаток от деления, use_coefficient - та часть БЧ, которую будем делить
+    Large_size remainder = 0, use_coefficient = 0;     // remainder - остаток от деления, use_coefficient - та часть БЧ, которую будем делить
     for(int i = 0; i < taken_coefficient; i++){
         use_coefficient = integers[i] + (remainder << Base_size * 8);   // сдиг остатка на разряд и прибавление следующего коэффициента
         Quotient.integers[i] = use_coefficient / n;     // деление на число
@@ -237,7 +229,7 @@ Big_Number Big_Number::operator/(int n) {
 
 int Big_Number::operator%(int n) {
     Big_Number Quotient(2, taken_coefficient);  // то же самое, что и в "/", изменен только return
-    int remainder = 0, use_coefficient = 0;
+    Large_size remainder = 0, use_coefficient = 0;
     for(int i = 0; i < taken_coefficient; i++){
         use_coefficient = integers[i] + (remainder << Base_size * 8);
         Quotient.integers[i] = use_coefficient / n;
@@ -258,7 +250,7 @@ Big_Number Big_Number::operator/( Big_Number &BN) {
             if(c > 0)Result.Shift(1);   // если добавили более 1-го коэфф. к "активной" части, то, соотвецтвенно, результат увеличивается
             c = 1;  // счетчик
         }
-        int res = 0; // сюда попадет промежуточный результат деления
+        Large_size res = 0; // сюда попадет промежуточный результат деления
         while(use_coefficient >= BN){   // само деление, посредством вычетания делителя из "активной" части БЧ
             use_coefficient = use_coefficient - BN; // вычетание
             res += 1;   // увеличение промежуточного результата
@@ -297,6 +289,3 @@ Big_Number Big_Number::From_decimal(string str) {
        }
     return Result;
 }
-
-
-
