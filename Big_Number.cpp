@@ -170,17 +170,18 @@ Big_Number Big_Number::operator-(const Big_Number &BN) {
 }
 
 Big_Number Big_Number::operator*(int n) {
+    int index = 0;
     Large_size res = 0;        //переменная для промежуточного результата
     Large_size term = 0;   // то, что перенесем в следующий разряд
     Big_Number Composition(2, taken_coefficient + 1);
     for(int i = taken_coefficient - 1; i >= 0; i--){
         Large_size factor = integers[i];
         res = factor * n + term;
-        Composition.integers[i + 1] = res;  // i + 1: так как в результате произведения размер БЧ может получиться больше на 1, записываеипромежуточный результат в соотвецтвующий разряд
-        res >>= (Base_size * 8);        // сдвиг и последующая запись в следующий разряд
-        Composition.integers[i] = res;
-        term = Composition.integers[i];
+        Composition.integers[i + 1] = res;  // i + 1: так как в результате произведения размер БЧ может получиться больше на 1, записываем промежуточный результат в соответствующий разряд
+        term = res >> (Base_size * 8);
+        index = i;
     }
+    Composition[index + 1] = res;
     return Composition;
 }
 
@@ -192,7 +193,7 @@ Big_Number Big_Number::operator*(const Big_Number &BN) {
         Big_Number Term(2, taken_coefficient + 1);  //создаем БЧ, для записи промежуточного результата
         Large_size factor = BN.integers[j];    // коэфф. БЧ, на который будем умножать
         Term = *this * factor;  // умножение БЧ на коэфф. и запись промежуточного результата
-        Term = Term << BN.taken_coefficient - 1 - j;    //сдвиг на соотвецтвующее место (в зависимости от разряда коэфф.) (перегрузка сдвига ниже)
+        Term = Term << BN.taken_coefficient - 1 - j;    //сдвиг на соответствующее место (в зависимости от разряда коэфф.) (перегрузка сдвига ниже)
         Composition = Composition + Term;       //сумма промежуточного результата с конечным ответом
     }
     return Composition;
@@ -249,7 +250,7 @@ Big_Number Big_Number::operator/( Big_Number &BN) {
             use_coefficient.Shift(1);   // сдвиг "активной" части БЧ
             use_coefficient.integers[taken_coefficient - 1] += integers[i]; // на освободившееся место ставлм соед. кофф. из БЧ
             i++;    // далее рассматриваем слкдующий коэфф. в БЧ
-            if(c > 0)Result.Shift(1);   // если добавили более 1-го коэфф. к "активной" части, то, соотвецтвенно, результат увеличивается
+            if(c > 0)Result.Shift(1);   // если добавили более 1-го коэфф. к "активной" части, то, соответственно, результат увеличивается
             c = 1;  // счетчик
         }
         Large_size res = 0; // сюда попадет промежуточный результат деления
@@ -258,7 +259,7 @@ Big_Number Big_Number::operator/( Big_Number &BN) {
             res += 1;   // увеличение промежуточного результата
         }
         Result.Shift(1); // сдвиг результата
-        Result.integers[taken_coefficient-1] = res; // запись соотвецтвующего коэфф. результата
+        Result.integers[taken_coefficient-1] = res; // запись соответствующего коэфф. результата
         remainder = use_coefficient;    // запись остатка
     }
     return Result;
@@ -283,7 +284,7 @@ string Big_Number::To_decimal(){    // перевод в 10-ую систему 
 }
 
 Big_Number Big_Number::From_decimal(string str) {
-    Big_Number Result(2,1), factor(2, 1);      //Result - результат, factor - множитель, для увеличения коэфф. в 10(в соотвецтвующей степени)
+    Big_Number Result(2,1), factor(2, 1);      //Result - результат, factor - множитель, для увеличения коэфф. в 10(в соответствующей степени)
     factor.integers[0] = 1; // начальное значение множителя
     for(int i = 0; i < str.size(); i++){
         Result += factor * ((int)str[str.size() - i - 1] - '0');    //запись в конечный результат
