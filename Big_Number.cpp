@@ -4,10 +4,10 @@
 using namespace std;
 
 Big_Number::Big_Number() {                          //конструктор без аргументов
-        taken_coefficient = all_coefficient = 1;
-        integers = new Base;
-        integers[0] = 0;
-    }
+    taken_coefficient = all_coefficient = 1;
+    integers = new Base;
+    integers[0] = 0;
+}
 
 Big_Number::Big_Number(int k, int n) {              //конструктор с аргументами:
     if(k == 2){                                            //при k = 2 создаем большое число нужного размера, состоящее полностью из нулей
@@ -22,7 +22,7 @@ Big_Number::Big_Number(int k, int n) {              //конструктор с 
         integers = new Base[taken_coefficient];
         for(int i=0; i < all_coefficient; i++) {
             integers[i] = rand();
-            }
+        }
     }
 }
 
@@ -41,13 +41,13 @@ Big_Number::~Big_Number(){                  //диструктор
 ostream &operator << (ostream &out, const Big_Number &BN) {
     bool is_write_zero = false;         //проупск первых нулей
     for(int i = 0; i < BN.taken_coefficient; i++){      //вывод с начала
-       for(int j = Base_size * 8 - 4; j >= 0; j -= 4){
-           int hex_coefficient = (BN.integers[i] >> j) & 15;    //15 - 4 единички в конце
-           if((is_write_zero) || (!is_write_zero && hex_coefficient != 0)){
-               out << hex << hex_coefficient;
-               is_write_zero = true;
-           }
-       }
+        for(int j = Base_size * 8 - 4; j >= 0; j -= 4){
+            int hex_coefficient = (BN.integers[i] >> j) & 15;    //15 - 4 единички в конце
+            if((is_write_zero) || (!is_write_zero && hex_coefficient != 0)){
+                out << hex << hex_coefficient;
+                is_write_zero = true;
+            }
+        }
     }
     return out;
 }
@@ -108,10 +108,10 @@ int Big_Number::Compare(const Big_Number & BN_2){
     int This_Zero = this->Count_Zero(); //вычисляем количество незначащих нулей(перед самим числом)
     if(this->taken_coefficient - This_Zero > BN_2.taken_coefficient - BN_2_Zero) return 1;      //стр. 109-111 : сравниваем по длине
     if(this -> taken_coefficient - This_Zero < BN_2.taken_coefficient - BN_2_Zero) return -1;
-        for(int i = This_Zero, j = BN_2_Zero; i < this -> taken_coefficient; i++, j++){     //сравниваем коэфф. чисел, начиная с первого значащего коэфф (страрший значащий разряд)
-            if(this -> integers[i] > BN_2.integers[j]) return 1;
-            if(this -> integers[i] < BN_2.integers[j]) return -1;
-        }   //цикл, пока разряд одного числа, не будет больше разряда другого
+    for(int i = This_Zero, j = BN_2_Zero; i < this -> taken_coefficient; i++, j++){     //сравниваем коэфф. чисел, начиная с первого значащего коэфф (страрший значащий разряд)
+        if(this -> integers[i] > BN_2.integers[j]) return 1;
+        if(this -> integers[i] < BN_2.integers[j]) return -1;
+    }   //цикл, пока разряд одного числа, не будет больше разряда другого
     return 0;
 }
 
@@ -181,7 +181,7 @@ Big_Number Big_Number::operator*(int n) {
         term = res >> (Base_size * 8);
         index = i;
     }
-    Composition[index + 1] = res;
+    Composition.integers[index + 1] = res;
     return Composition;
 }
 
@@ -231,11 +231,13 @@ Big_Number Big_Number::operator/(int n) {
 }
 
 int Big_Number::operator%(int n) {
-    Big_Number Quotient(2, taken_coefficient);  // то же самое, что и в "/", изменен только return
+    if(n == 0){
+        cout << "error";
+        return 0;
+    }
     Large_size remainder = 0, use_coefficient = 0;
     for(int i = 0; i < taken_coefficient; i++){
         use_coefficient = integers[i] + (remainder << Base_size * 8);
-        Quotient.integers[i] = use_coefficient / n;
         remainder = use_coefficient % n;
     }
     return remainder;
@@ -243,7 +245,11 @@ int Big_Number::operator%(int n) {
 
 Big_Number Big_Number::operator/( Big_Number &BN) {
     Big_Number Result(2, taken_coefficient), use_coefficient(2, taken_coefficient),
-    remainder(2, BN.taken_coefficient); // Result - результат деления, use_coefficient - "активная" часть делимого, remainder - остаток
+            remainder(2, BN.taken_coefficient), Zero(2, 1); // Result - результат деления, use_coefficient - "активная" часть делимого, remainder - остаток
+            if(BN == Zero){
+                cout << "error";
+                return Zero;
+            }
     for(int i = 0; i < taken_coefficient;){
         int c = 0;  // счетчик для сдвига результата делния
         while(use_coefficient < BN){        // увеличение "активной" части делителя, для последующего деления
@@ -275,20 +281,33 @@ Big_Number Big_Number::Shift(int n) {       //сдвиг, без увеличе�
 
 string Big_Number::To_decimal(){    // перевод в 10-ую систему счисления
     Big_Number Number = *this, Zero(2, 1);  //Zero - ноль в виде БЧ
-    string integer = "";    // пустая строка
+    string integer = "", null_srt = "";    // пустая строка
+    int counter = 0;
     while(Number > Zero){
+        counter ++;
         integer = (char)((Number % 10) + '0') + integer;    //запись в строку цифры
         Number = Number / 10;   // уменьшение БЧ
+    }
+    for(int i = 0; i < counter; i++){
+        int code = integer[i];
+        if(code < 48 || code > 57)return null_srt;
     }
     return integer;
 }
 
 Big_Number Big_Number::From_decimal(string str) {
+    for(auto str_el: str){
+        int code = str_el;
+        if(48 < code || code > 57){
+            Big_Number zero(2, 1);
+            return zero;
+        }
+    }
     Big_Number Result(2,1), factor(2, 1);      //Result - результат, factor - множитель, для увеличения коэфф. в 10(в соответствующей степени)
     factor.integers[0] = 1; // начальное значение множителя
-    for(int i = 0; i < str.size(); i++){
-        Result += factor * ((int)str[str.size() - i - 1] - '0');    //запись в конечный результат
+    for(int i = str.size() - 1; i >= 0  ; i--){
+        Result += factor * ((int)str[i] - '0');    //запись в конечный результат
         factor = factor * 10;   // увеличение множителя
-       }
+    }
     return Result;
 }
