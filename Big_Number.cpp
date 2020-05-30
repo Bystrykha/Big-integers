@@ -272,10 +272,14 @@ Big_Number Big_Number::operator/( Big_Number &BN) {
 }
 
 Big_Number Big_Number::Shift(int n) {       //сдвиг, без увеличения памяти в БЧ
-    for(int i = all_coefficient - taken_coefficient - 1; i < all_coefficient ; i++){
-        integers[i - n] = integers[i];
-        integers[i] = 0;
+    if (n < all_coefficient) {
+    for(int i = n, j = 0; i < all_coefficient ; i++, j++) {
+            integers[j] = integers[i];
+            integers[i] = 0;
+        }
     }
+    else return *this;
+    cout << "res = " << *this << endl;
     return *this;
 }
 
@@ -310,4 +314,32 @@ Big_Number Big_Number::From_decimal(string str) {
         factor = factor * 10;   // увеличение множителя
     }
     return Result;
+}
+
+Big_Number Big_Number::operator%(Big_Number &BN) {
+    Big_Number Result(2, taken_coefficient), use_coefficient(2, taken_coefficient),
+            remainder(2, BN.taken_coefficient), Zero(2, 1); // Result - результат деления, use_coefficient - "активная" часть делимого, remainder - остаток
+    if(BN == Zero){
+        cout << "error";
+        return Zero;
+    }
+    for(int i = 0; i < taken_coefficient;){
+        int c = 0;  // счетчик для сдвига результата делния
+        while(use_coefficient < BN){        // увеличение "активной" части делителя, для последующего деления
+            use_coefficient.Shift(1);   // сдвиг "активной" части БЧ
+            use_coefficient.integers[taken_coefficient - 1] += integers[i]; // на освободившееся место ставлм соед. кофф. из БЧ
+            i++;    // далее рассматриваем слкдующий коэфф. в БЧ
+            if(c > 0)Result.Shift(1);   // если добавили более 1-го коэфф. к "активной" части, то, соответственно, результат увеличивается
+            c = 1;  // счетчик
+        }
+        Large_size res = 0; // сюда попадет промежуточный результат деления
+        while(use_coefficient >= BN){   // само деление, посредством вычетания делителя из "активной" части БЧ
+            use_coefficient = use_coefficient - BN; // вычетание
+            res += 1;   // увеличение промежуточного результата
+        }
+        Result.Shift(1); // сдвиг результата
+        Result.integers[taken_coefficient-1] = res; // запись соответствующего коэфф. результата
+        remainder = use_coefficient;    // запись остатка
+    }
+    return remainder;
 }

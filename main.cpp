@@ -16,9 +16,9 @@ int main() {
    Big_Number a, b, c;
    int q, w;
    cin >> a;
-   cin >> b;
+  // cin >> b;
    cin >> q;
-   if(a > b) cout << "a > b" << endl;
+  /* if(a > b) cout << "a > b" << endl;
    if(a < b) cout << "a < b" << endl;
    if(a >= b) cout << "a >= b" << endl;
    if(a <= b) cout << "a <= b" << endl;
@@ -41,6 +41,8 @@ int main() {
    w = a % q;
    cout << "a % q = " << w << endl;
    c = Big_Number::From_decimal("68247244188094483");
-   cout << c << endl;
+   cout << c << endl; */
+  a.Shift(q);
+  cout << a;
    return 0;
 }
