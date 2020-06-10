@@ -107,7 +107,7 @@ int Big_Number::Compare(const Big_Number & BN_2){
     int BN_2_Zero = BN_2.Count_Zero();  //вычисляем количество незначащих нулей(перед самим числом)
     int This_Zero = this->Count_Zero(); //вычисляем количество незначащих нулей(перед самим числом)
     if(this->taken_coefficient - This_Zero > BN_2.taken_coefficient - BN_2_Zero) return 1;      //стр. 109-111 : сравниваем по длине
-    if(this -> taken_coefficient - This_Zero < BN_2.taken_coefficient - BN_2_Zero) return -1;
+    if(this -> taken_coefficient - This_Zero < BN_2.taken_coefficient - BN_2_Zero) return -1;      //стр. 109-111 : сравниваем по длине
     for(int i = This_Zero, j = BN_2_Zero; i < this -> taken_coefficient; i++, j++){     //сравниваем коэфф. чисел, начиная с первого значащего коэфф (страрший значащий разряд)
         if(this -> integers[i] > BN_2.integers[j]) return 1;
         if(this -> integers[i] < BN_2.integers[j]) return -1;
@@ -117,7 +117,7 @@ int Big_Number::Compare(const Big_Number & BN_2){
 
 int Big_Number::Count_Zero() const {        //подсчет незначащих нулей
     for(int i = 0; i < all_coefficient; i++) if(integers[i] > 0) return i;
-    return 0;
+    return all_coefficient;
 }
 
 Big_Number Big_Number::operator+(const Big_Number &BN) {
@@ -147,29 +147,39 @@ Big_Number &Big_Number::operator=(const Big_Number& BN) {
 }
 
 Big_Number Big_Number::operator-(const Big_Number &BN) {
+    cout <<" - " << endl;
     Big_Number Result(2,taken_coefficient);
     if(taken_coefficient < BN.taken_coefficient) return Result; //если вычетаемое > уменьшаемого
     for(int i = taken_coefficient - 1, j = BN.taken_coefficient -1; i >= 0; i--, j--){ // i - счетчик уменьшаемого, j - счетчик вычитаемого
         Large_size first = integers[i], second = 0;    //переменные: first - уменьшаемое, second - вычетаемое
         if(j >= 0) second = BN.integers[j]; // запись вычетаемого
+        cout << hex << (int)first << " - " << (int)second << endl;
         if(first < second){ // если потребовался займ из следующих разрядов
             for(int k = i - 1; k >= 0; k--) {
                 if(integers[k] > 0){    // когда коэфф., у которого занимаем, больше 0
                     for(int t = i - 1; t > k; t--){     // нули заменяем наибольшей цифрой
                         integers[t] += pow(2,Base_size * 8) - 1;
+                        cout << "work" << endl;
                     }
+                    cout << hex << "zaim before = " << (int)integers[k] << endl;
                     integers[k] -= 1;       // уменьшение коэфф., у которого заняли
-                    first += pow(2,Base_size * 8); // увеличение уменьшаемого
+                    cout<< hex << "zaim after = " << (int)integers[k] << endl;
+                       first += pow(2,Base_size * 8); // увеличение уменьшаемого
+                    cout<< hex << (int)first << " - " << (int)second << endl;
                     break;
                 }
             }
         }
         Result.integers[i] = first - second; //запись в ответ
+        cout << "res = " << (int)Result.integers[i] << endl;
     }
+    cout << "res = " << Result << endl;
     return Result;
 }
 
 Big_Number Big_Number::operator*(int n) {
+    Big_Number zero(2, 1);
+    if(n == 0 || *this == zero) return zero;
     int index = 0;
     Large_size res = 0;        //переменная для промежуточного результата
     Large_size term = 0;   // то, что перенесем в следующий разряд
@@ -181,19 +191,21 @@ Big_Number Big_Number::operator*(int n) {
         term = res >> (Base_size * 8);
         index = i;
     }
-    Composition.integers[index + 1] = res;
+    Composition.integers[index] = term;
     return Composition;
 }
 
 
 Big_Number Big_Number::operator*(const Big_Number &BN) {
+    Big_Number zero(2, 1);
+    if(*this == zero || zero == BN) return zero;
     Large_size Comp_size = taken_coefficient + BN.taken_coefficient;   // максимальный возможный размер результата
     Big_Number Composition(2, Comp_size);
-    for(int j = BN.taken_coefficient - 1; j >= 0; j--){     //движемся по одному из множетелей от млажшего разряда к старшему
+    for(int j = 0; j < BN.taken_coefficient; j++){     //движемся по одному из множетелей от млажшего разряда к старшему
         Big_Number Term(2, taken_coefficient + 1);  //создаем БЧ, для записи промежуточного результата
         Large_size factor = BN.integers[j];    // коэфф. БЧ, на который будем умножать
         Term = *this * factor;  // умножение БЧ на коэфф. и запись промежуточного результата
-        Term = Term << BN.taken_coefficient - 1 - j;    //сдвиг на соответствующее место (в зависимости от разряда коэфф.) (перегрузка сдвига ниже)
+        Composition = Composition << Base_size;
         Composition = Composition + Term;       //сумма промежуточного результата с конечным ответом
     }
     return Composition;
@@ -220,67 +232,76 @@ Big_Number Big_Number::operator+=(const Big_Number &BN) {
 }
 
 Big_Number Big_Number::operator/(int n) {
-    Big_Number Quotient(2, taken_coefficient);      // результат разности
+    if(n == 0) return *this;
+    Big_Number a(2, 1);
+    a.integers[0] = 1;
+    Big_Number Quotient(2, taken_coefficient);      // результат деления
     Large_size remainder = 0, use_coefficient = 0;     // remainder - остаток от деления, use_coefficient - та часть БЧ, которую будем делить
     for(int i = 0; i < taken_coefficient; i++){
+        Quotient = Quotient << Base_size;
         use_coefficient = integers[i] + (remainder << Base_size * 8);   // сдиг остатка на разряд и прибавление следующего коэффициента
-        Quotient.integers[i] = use_coefficient / n;     // деление на число
-        remainder = use_coefficient % n;    // вычисление остатка
+        while(use_coefficient >= n){
+            use_coefficient = use_coefficient - n;
+            Quotient += a;
+        }
+        remainder = use_coefficient;    // вычисление остатка
     }
     return Quotient;
 }
 
 int Big_Number::operator%(int n) {
-    if(n == 0){
-        cout << "error";
-        return 0;
-    }
-    Large_size remainder = 0, use_coefficient = 0;
-    for(int i = 0; i < taken_coefficient; i++){
-        use_coefficient = integers[i] + (remainder << Base_size * 8);
-        remainder = use_coefficient % n;
+    if(n == 0) return 0;
+    Large_size remainder = 0, use_coefficient = 0;     // remainder - остаток от деления, use_coefficient - та часть БЧ, которую будем делить
+    for (int i = 0; i < taken_coefficient; i++) {
+        use_coefficient = integers[i] + (remainder << Base_size * 8);   // сдиг остатка на разряд и прибавление следующего коэффициента
+        while (use_coefficient >= n) {
+            use_coefficient = use_coefficient - n;
+        }
+        remainder = use_coefficient;    // вычисление остатка
     }
     return remainder;
 }
 
-Big_Number Big_Number::operator/( Big_Number &BN) {
-    Big_Number Result(2, taken_coefficient), use_coefficient(2, taken_coefficient),
-            remainder(2, BN.taken_coefficient), Zero(2, 1); // Result - результат деления, use_coefficient - "активная" часть делимого, remainder - остаток
-            if(BN == Zero){
-                cout << "error";
-                return Zero;
+Big_Number Big_Number::operator/(Big_Number &BN) {
+    Big_Number result(2, this->all_coefficient), active_dividend(2, this->all_coefficient),
+            zero(2, 1), one(2, 1);
+    if (BN == zero) return zero;
+    one.integers[0] = 1;
+    if (*this < BN) return zero;
+    else
+        for (int i = 0; i < this->all_coefficient;) {
+           while (active_dividend < BN) {
+                result = result << Base_size;
+                active_dividend = active_dividend << Base_size;
+                active_dividend.integers[all_coefficient + i] += this->integers[i];
+                i++;
             }
-    for(int i = 0; i < taken_coefficient;){
-        int c = 0;  // счетчик для сдвига результата делния
-        while(use_coefficient < BN){        // увеличение "активной" части делителя, для последующего деления
-            use_coefficient.Shift(1);   // сдвиг "активной" части БЧ
-            use_coefficient.integers[taken_coefficient - 1] += integers[i]; // на освободившееся место ставлм соед. кофф. из БЧ
-            i++;    // далее рассматриваем слкдующий коэфф. в БЧ
-            if(c > 0)Result.Shift(1);   // если добавили более 1-го коэфф. к "активной" части, то, соответственно, результат увеличивается
-            c = 1;  // счетчик
+            while (active_dividend >= BN) {
+                active_dividend -= BN;
+                result += one;
+            }
         }
-        Large_size res = 0; // сюда попадет промежуточный результат деления
-        while(use_coefficient >= BN){   // само деление, посредством вычетания делителя из "активной" части БЧ
-            use_coefficient = use_coefficient - BN; // вычетание
-            res += 1;   // увеличение промежуточного результата
-        }
-        Result.Shift(1); // сдвиг результата
-        Result.integers[taken_coefficient-1] = res; // запись соответствующего коэфф. результата
-        remainder = use_coefficient;    // запись остатка
-    }
-    return Result;
+     return result;
 }
 
-Big_Number Big_Number::Shift(int n) {       //сдвиг, без увеличения памяти в БЧ
-    if (n < all_coefficient) {
-    for(int i = n, j = 0; i < all_coefficient ; i++, j++) {
-            integers[j] = integers[i];
-            integers[i] = 0;
+Big_Number Big_Number::operator%(Big_Number &BN) {
+    Big_Number active_dividend(2, this->all_coefficient),
+            remains(2, all_coefficient), zero(2, 1);
+    if (BN == zero) return zero;
+    if (*this < BN) return *this;
+    else {
+        for (int i = 0; i < this->all_coefficient;) {
+            while (active_dividend < BN) {
+                active_dividend = active_dividend << Base_size;
+                active_dividend.integers[all_coefficient + i] += this->integers[i];
+                i++;
+            }
+            while (active_dividend >= BN) {
+                active_dividend -= BN;
+            }
         }
     }
-    else return *this;
-    cout << "res = " << *this << endl;
-    return *this;
+    return active_dividend;
 }
 
 string Big_Number::To_decimal(){    // перевод в 10-ую систему счисления
@@ -314,32 +335,4 @@ Big_Number Big_Number::From_decimal(string str) {
         factor = factor * 10;   // увеличение множителя
     }
     return Result;
-}
-
-Big_Number Big_Number::operator%(Big_Number &BN) {
-    Big_Number Result(2, taken_coefficient), use_coefficient(2, taken_coefficient),
-            remainder(2, BN.taken_coefficient), Zero(2, 1); // Result - результат деления, use_coefficient - "активная" часть делимого, remainder - остаток
-    if(BN == Zero){
-        cout << "error";
-        return Zero;
-    }
-    for(int i = 0; i < taken_coefficient;){
-        int c = 0;  // счетчик для сдвига результата делния
-        while(use_coefficient < BN){        // увеличение "активной" части делителя, для последующего деления
-            use_coefficient.Shift(1);   // сдвиг "активной" части БЧ
-            use_coefficient.integers[taken_coefficient - 1] += integers[i]; // на освободившееся место ставлм соед. кофф. из БЧ
-            i++;    // далее рассматриваем слкдующий коэфф. в БЧ
-            if(c > 0)Result.Shift(1);   // если добавили более 1-го коэфф. к "активной" части, то, соответственно, результат увеличивается
-            c = 1;  // счетчик
-        }
-        Large_size res = 0; // сюда попадет промежуточный результат деления
-        while(use_coefficient >= BN){   // само деление, посредством вычетания делителя из "активной" части БЧ
-            use_coefficient = use_coefficient - BN; // вычетание
-            res += 1;   // увеличение промежуточного результата
-        }
-        Result.Shift(1); // сдвиг результата
-        Result.integers[taken_coefficient-1] = res; // запись соответствующего коэфф. результата
-        remainder = use_coefficient;    // запись остатка
-    }
-    return remainder;
 }
