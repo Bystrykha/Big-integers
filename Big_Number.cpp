@@ -147,22 +147,20 @@ Big_Number &Big_Number::operator=(const Big_Number& BN) {
 }
 
 Big_Number Big_Number::operator-(const Big_Number &BN) {
-   Big_Number Result(2,taken_coefficient), zero(2, 1);
-    Large_size loan = 0, b = 0, c = 0, a = 0;
+    Big_Number Result(2,taken_coefficient), zero(2, 1);
+    Large_size loan = 0, b = 0, a = 0;
     if(*this < BN) return Result; //если вычетаемое > уменьшаемого
     for(int i = all_coefficient - 1, j = BN.all_coefficient - 1; i >= 0; j--, i--){
-        a = this->integers[i];
+        a = this->integers[i] - loan;
         if(j < 0) b = 0;
         else b = BN.integers[j];
         if(a < b){
             a += pow(2, Base_size * 8);
-            Result.integers[i] = a - b - loan;
-            c = a - b - loan;
+            Result.integers[i] = a - b;
             loan = 1;
         }
         else{
-            Result.integers[i] = a - b - loan;
-            c = Result.integers[i];
+            Result.integers[i] = a - b;
             loan = 0;
         }
     }
@@ -260,12 +258,12 @@ Big_Number Big_Number::operator/(Big_Number &BN) {
     if (BN == zero) return zero;
     one.integers[0] = 1;
     if (*this < BN) return zero;
-    else
+    else {
         for (int i = 0; i < this->all_coefficient;) {
-           while (active_dividend < BN) {
+            while (active_dividend < BN) {
                 result = result << Base_size;
                 active_dividend = active_dividend << Base_size;
-                active_dividend.integers[all_coefficient + i] += this->integers[i];
+                active_dividend.integers[all_coefficient + i] = this->integers[i];
                 i++;
             }
             while (active_dividend >= BN) {
@@ -273,8 +271,8 @@ Big_Number Big_Number::operator/(Big_Number &BN) {
                 result += one;
             }
         }
-        cout << "remaind = " << active_dividend << endl;
-     return result;
+    }
+    return result;
 }
 
 Big_Number Big_Number::operator%(Big_Number &BN) {
@@ -289,11 +287,9 @@ Big_Number Big_Number::operator%(Big_Number &BN) {
                 active_dividend.integers[all_coefficient + i] += this->integers[i];
                 i++;
             }
-            cout << active_dividend << endl;
             while (active_dividend >= BN) {
                 active_dividend -= BN;
             }
-            cout <<"A_P = " << active_dividend << endl;
         }
     }
     return active_dividend;
