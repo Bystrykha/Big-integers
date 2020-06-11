@@ -45,33 +45,45 @@ int main() {
 //    system("pause");
     int n = 12, m;
     srand(time(0));
-    Big_Number A, B, C, D, q, w, e;
+    Big_Number A, B, C, D;
     for (int i = 0; i < 10; i++) {
-      Big_Number A(3, 1 + rand() % 30);
-      Big_Number B(3, 1 + rand() % 30);
-        cin >> A >> B >> C >> D;
-        //C = A / B;
-        //D = A % B;
-        cout << "E - GOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
-        e = A - D;
-        cout <<"e = " << e << endl;
-        cout << "E - ENNNNNNNNNNNNNNNNNNNNNNNNND" << endl;
-        q = C * B;
-        q = q + D;
-        w = C * B;
-        cin >> m;
-        cout << "A = " << A << endl << "B = " << B << endl << "C = " << C << endl << "D = " << D << endl;
-        cout << A << " = " << q << endl << w << " = " << e << endl;
+   //   Big_Number A(3, 1 + rand() % 30);
+   //   Big_Number B(3, 1 + rand() % 30);
+       //
+        cin >> A >> B;
+        cout << B << endl;
+       // cout << "A = " << A << endl << "B = " << B << endl;
+        C = A % B;
+        cout << "C = " << C << endl;
+        //cout << "AAAAA" << endl;
+        D = A / B;
+        //cout << "BBBBBBBB" << endl;
+        //cout << "C = " << C << endl << "D = " << D << endl;
+        //cout << A << " = " << C * B + D << endl << A - D << " = " << C * B << endl;
         if(A == C * B + D && A - D == C * B) cout << "OK" << endl;
         else{
             cout << "no OK" << endl;
             break;
         }
+        cout << i << endl;
+//       cout << C << endl;
+//       cout << A << endl;
+//       cout << B << endl;
     }
         return 0;
     }
 
-// A = 69a6b66239d29bb866fd4383fc93bca626a031b4f487c6
-// B = 5bf8c4ac7e
-// C = 1261388896e84261d4711dc77c44bd859113c
-// D = 4a0f99bc3e
+// A = 7d8656c69bade53b33ee4f98bbf133fdf0 (20)
+// B = 7b848410fa310728ad98d982f89ffff (15)
+//45014db74d3d4fe895f94870fa00e32
+
+//75ce0e858c0ad4c8a914c2008c6733fe
+//7b848410fa310728ad98d982f89ffff
+
+//6e15c6447c67c4561e3b34685cdd33ff
+
+//665d7e036cc4b3e39361a6d02d533400
+//665d7e036cc4b3e39361a6d02d533400
+
+//201d2b5a17cde1286557615c351340df0
+//7b848410fa310728ad98d982f89ffff

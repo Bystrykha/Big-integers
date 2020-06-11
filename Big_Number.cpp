@@ -147,33 +147,25 @@ Big_Number &Big_Number::operator=(const Big_Number& BN) {
 }
 
 Big_Number Big_Number::operator-(const Big_Number &BN) {
-    cout <<" - " << endl;
-    Big_Number Result(2,taken_coefficient);
-    if(taken_coefficient < BN.taken_coefficient) return Result; //если вычетаемое > уменьшаемого
-    for(int i = taken_coefficient - 1, j = BN.taken_coefficient -1; i >= 0; i--, j--){ // i - счетчик уменьшаемого, j - счетчик вычитаемого
-        Large_size first = integers[i], second = 0;    //переменные: first - уменьшаемое, second - вычетаемое
-        if(j >= 0) second = BN.integers[j]; // запись вычетаемого
-        cout << hex << (int)first << " - " << (int)second << endl;
-        if(first < second){ // если потребовался займ из следующих разрядов
-            for(int k = i - 1; k >= 0; k--) {
-                if(integers[k] > 0){    // когда коэфф., у которого занимаем, больше 0
-                    for(int t = i - 1; t > k; t--){     // нули заменяем наибольшей цифрой
-                        integers[t] += pow(2,Base_size * 8) - 1;
-                        cout << "work" << endl;
-                    }
-                    cout << hex << "zaim before = " << (int)integers[k] << endl;
-                    integers[k] -= 1;       // уменьшение коэфф., у которого заняли
-                    cout<< hex << "zaim after = " << (int)integers[k] << endl;
-                       first += pow(2,Base_size * 8); // увеличение уменьшаемого
-                    cout<< hex << (int)first << " - " << (int)second << endl;
-                    break;
-                }
-            }
+   Big_Number Result(2,taken_coefficient), zero(2, 1);
+    Large_size loan = 0, b = 0, c = 0, a = 0;
+    if(*this < BN) return Result; //если вычетаемое > уменьшаемого
+    for(int i = all_coefficient - 1, j = BN.all_coefficient - 1; i >= 0; j--, i--){
+        a = this->integers[i];
+        if(j < 0) b = 0;
+        else b = BN.integers[j];
+        if(a < b){
+            a += pow(2, Base_size * 8);
+            Result.integers[i] = a - b - loan;
+            c = a - b - loan;
+            loan = 1;
         }
-        Result.integers[i] = first - second; //запись в ответ
-        cout << "res = " << (int)Result.integers[i] << endl;
+        else{
+            Result.integers[i] = a - b - loan;
+            c = Result.integers[i];
+            loan = 0;
+        }
     }
-    cout << "res = " << Result << endl;
     return Result;
 }
 
@@ -281,6 +273,7 @@ Big_Number Big_Number::operator/(Big_Number &BN) {
                 result += one;
             }
         }
+        cout << "remaind = " << active_dividend << endl;
      return result;
 }
 
@@ -296,9 +289,11 @@ Big_Number Big_Number::operator%(Big_Number &BN) {
                 active_dividend.integers[all_coefficient + i] += this->integers[i];
                 i++;
             }
+            cout << active_dividend << endl;
             while (active_dividend >= BN) {
                 active_dividend -= BN;
             }
+            cout <<"A_P = " << active_dividend << endl;
         }
     }
     return active_dividend;
