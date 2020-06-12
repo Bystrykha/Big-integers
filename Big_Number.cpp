@@ -151,9 +151,9 @@ Big_Number Big_Number::operator-(const Big_Number &BN) {
     Large_size loan = 0, b = 0, a = 0;
     if(*this < BN) return Result; //если вычетаемое > уменьшаемого
     for(int i = all_coefficient - 1, j = BN.all_coefficient - 1; i >= 0; j--, i--){
-        a = this->integers[i] - loan;
-        if(j < 0) b = 0;
-        else b = BN.integers[j];
+        a = this->integers[i];
+        if(j < 0) b = loan;
+        else b = BN.integers[j] + loan;
         if(a < b){
             a += pow(2, Base_size * 8);
             Result.integers[i] = a - b;
@@ -253,46 +253,40 @@ int Big_Number::operator%(int n) {
 }
 
 Big_Number Big_Number::operator/(Big_Number &BN) {
-    Big_Number result(2, this->all_coefficient), active_dividend(2, this->all_coefficient),
-            zero(2, 1), one(2, 1);
-    if (BN == zero) return zero;
-    one.integers[0] = 1;
-    if (*this < BN) return zero;
-    else {
-        for (int i = 0; i < this->all_coefficient;) {
-            while (active_dividend < BN) {
-                result = result << Base_size;
-                active_dividend = active_dividend << Base_size;
-                active_dividend.integers[all_coefficient + i] = this->integers[i];
-                i++;
-            }
-            while (active_dividend >= BN) {
-                active_dividend -= BN;
-                result += one;
-            }
+    Big_Number result(2, taken_coefficient), active_part(2, BN.taken_coefficient + 1), zero(2, 1);
+    if(*this == zero || *this < BN) return zero;
+    if(BN == zero) return *this;
+    for(int i = 0; i < this->all_coefficient;){
+        while(active_part < BN && i < this->all_coefficient){
+            active_part.Shift(1);
+            result.Shift(1);
+            active_part.integers[BN.taken_coefficient] = this->integers[i];
+            i++;
+        }
+        while(active_part >= BN){
+            active_part -= BN;
+            result.integers[taken_coefficient - 1]++;
         }
     }
     return result;
 }
 
+
 Big_Number Big_Number::operator%(Big_Number &BN) {
-    Big_Number active_dividend(2, this->all_coefficient),
-            remains(2, all_coefficient), zero(2, 1);
-    if (BN == zero) return zero;
-    if (*this < BN) return *this;
-    else {
-        for (int i = 0; i < this->all_coefficient;) {
-            while (active_dividend < BN) {
-                active_dividend = active_dividend << Base_size;
-                active_dividend.integers[all_coefficient + i] += this->integers[i];
-                i++;
-            }
-            while (active_dividend >= BN) {
-                active_dividend -= BN;
-            }
+    Big_Number active_part(2, BN.taken_coefficient + 1), zero(2, 1);
+    if(*this == zero || *this < BN) return *this;
+    if(BN == zero) return *this;
+    for(int i = 0; i < this->all_coefficient;){
+        while(active_part < BN && i < this->all_coefficient){
+            active_part.Shift(1);
+            active_part.integers[BN.taken_coefficient] = this->integers[i];
+            i++;
+        }
+        while(active_part >= BN){
+            active_part -= BN;
         }
     }
-    return active_dividend;
+    return active_part;
 }
 
 string Big_Number::To_decimal(){    // перевод в 10-ую систему счисления
@@ -326,4 +320,12 @@ Big_Number Big_Number::From_decimal(string str) {
         factor = factor * 10;   // увеличение множителя
     }
     return Result;
+}
+
+Big_Number Big_Number::Shift(int n) {
+    for(int i = n; i < this->taken_coefficient; i++){
+        this->integers[i - n] = this->integers[i];
+        this->integers[i] = 0;
+    }
+    return *this;
 }

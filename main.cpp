@@ -46,22 +46,17 @@ int main() {
     int n = 12, m;
     srand(time(0));
     Big_Number A, B, C, D;
-    for (int i = 0; i < 10; i++) {
-      Big_Number A(3, 1 + rand() % 30);
-      Big_Number B(3, 1 + rand() % 30);
-        //cin >> A >> B;
-        cout << "A = " << A << endl << "B = " << B << endl;
+    for (int i = 0; i < 100; i++) {
+      Big_Number A(3, 1 + rand() % 1000);
+      Big_Number B(3, 1 + rand() % 1000);
+      cout << A << endl << B << endl;
         C = A / B;
-        cout << "C = " << C << endl;
         D = A % B;
-        cout << "C = " << C << endl << "D = " << D << endl;
-        cout << A << " = " << C * B + D << endl << A - D << " = " << C * B << endl;
-        if(A == C * B + D && A - D == C * B) cout << "OK" << endl;
+        if(A == C * B + D && A - D == C * B);
         else{
-            cout << "no OK" << endl;
             break;
         }
         cout << i << endl;
     }
-        return 0;
-    }
+    return 0;
+}
